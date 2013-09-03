@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
-# ruby script create temporary duplicates of smart answers
+# Ruby script to create temporary duplicates of smart answers.
 # These are used to allow testing and fact checking on preview
-# but will not be served on live (due to the status of draft)
+# but will not be served on live (due to the status of draft).
 
 # usage: ruby scripts/create-v2.rb smart-answer-name
 
@@ -40,5 +40,3 @@ v2file test_file_original, test_file_v2 do |content|
   content.gsub(/#{answer_name}/, "#{answer_name}-v2")
     .gsub(/#{class_name}/, "#{class_name}V2")
 end
-
-# change class names
