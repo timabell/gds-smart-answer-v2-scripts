@@ -26,16 +26,19 @@ test_name = answer_name.gsub("-", "_")
 test_file_original = "test/integration/flows/#{test_name}_test.rb"
 test_file_v2 = "test/integration/flows/#{test_name}_v2_test.rb"
 
+class_name = answer_name.split("-").map(&:capitalize).join
+
 v2file rb_file_original, rb_file_v2 do |content|
   content.gsub(/^status \:published$/, 'status :draft')
 end
 
 v2file yml_file_original, yml_file_v2 do |content|
-  content
+  content.gsub(/#{answer_name}/, "#{answer_name}-v2")
 end
 
 v2file test_file_original, test_file_v2 do |content|
-  content
+  content.gsub(/#{answer_name}/, "#{answer_name}-v2")
+    .gsub(/#{class_name}/, "#{class_name}V2")
 end
 
 # change class names
