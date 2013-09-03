@@ -7,6 +7,14 @@
 
 require 'fileutils'
 
+def v2file(source, dest, &block)
+  content = File.read(source)
+  File.open(dest, "w") do |file|
+    update = block.call(content)
+    file << update
+  end
+end
+
 answer_name = ARGV[0]
 raise "answer name missing from arguments" unless answer_name
 
@@ -17,9 +25,8 @@ FileUtils.cp("lib/flows/locales/en/#{answer_name}.yml", "lib/flows/locales/en/#{
 test_name = answer_name.gsub("-", "_")
 FileUtils.cp("test/integration/flows/#{test_name}_test.rb", "test/integration/flows/#{test_name}_v2_test.rb")
 
-rb = File.read(rb_file_original)
-File.open(rb_file_v2, "w") do |file|
-  file << rb.gsub(/^status \:published$/, 'status :draft')
+v2file rb_file_original, rb_file_v2 do |content|
+  content.gsub(/^status \:published$/, 'status :draft')
 end
 
 # change class names
