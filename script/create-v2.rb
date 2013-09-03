@@ -10,12 +10,16 @@ require 'fileutils'
 answer_name = ARGV[0]
 raise "answer name missing from arguments" unless answer_name
 
-# duplicate files
-FileUtils.cp("lib/flows/#{answer_name}.rb", "lib/flows/#{answer_name}-v2.rb")
+rb_file_original = "lib/flows/#{answer_name}.rb"
+rb_file_v2 = "lib/flows/#{answer_name}-v2.rb"
+
 FileUtils.cp("lib/flows/locales/en/#{answer_name}.yml", "lib/flows/locales/en/#{answer_name}-v2.yml")
 test_name = answer_name.gsub("-", "_")
 FileUtils.cp("test/integration/flows/#{test_name}_test.rb", "test/integration/flows/#{test_name}_v2_test.rb")
 
-# set to draft
+rb = File.read(rb_file_original)
+File.open(rb_file_v2, "w") do |file|
+  file << rb.gsub(/^status \:published$/, 'status :draft')
+end
 
 # change class names
