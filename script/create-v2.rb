@@ -8,5 +8,6 @@
 require 'fileutils'
 
 answer_name = ARGV[0]
+raise "answer name missing from arguments" unless answer_name
 
 FileUtils.cp("lib/flows/#{answer_name}.rb", "lib/flows/#{answer_name}-v2.rb")
