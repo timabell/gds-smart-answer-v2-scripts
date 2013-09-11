@@ -20,9 +20,12 @@ def setup_filenames(answer_name)
   @yml_file_original = "lib/flows/locales/en/#{answer_name}.yml"
   @yml_file_v2 = "lib/flows/locales/en/#{answer_name}-v2.yml"
 
-  test_name = answer_name.gsub("-", "_")
-  @test_file_original = "test/integration/flows/#{test_name}_test.rb"
-  @test_file_v2 = "test/integration/flows/#{test_name}_v2_test.rb"
+  snake_name = answer_name.gsub("-", "_")
+  @test_file_original = "test/integration/flows/#{snake_name}_test.rb"
+  @test_file_v2 = "test/integration/flows/#{snake_name}_v2_test.rb"
+
+  @calc_file_original = "lib/smart_answer/calculators/#{snake_name}.rb"
+  @calc_file_v2 = "lib/smart_answer/calculators/#{snake_name}_v2.rb"
 end
 
 def createv2(answer_name)
