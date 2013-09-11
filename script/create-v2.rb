@@ -14,18 +14,29 @@ def v2file(source, dest, &block)
 end
 
 def setup_filenames(answer_name)
-  @rb_file_original = "lib/flows/#{answer_name}.rb"
-  @rb_file_v2 = "lib/flows/#{answer_name}-v2.rb"
-
-  @yml_file_original = "lib/flows/locales/en/#{answer_name}.yml"
-  @yml_file_v2 = "lib/flows/locales/en/#{answer_name}-v2.yml"
-
-  snake_name = answer_name.gsub("-", "_")
-  @test_file_original = "test/integration/flows/#{snake_name}_test.rb"
-  @test_file_v2 = "test/integration/flows/#{snake_name}_v2_test.rb"
-
-  @calc_file_original = "lib/smart_answer/calculators/#{snake_name}.rb"
-  @calc_file_v2 = "lib/smart_answer/calculators/#{snake_name}_v2.rb"
+  [
+    snake_name = answer_name.gsub("-", "_")
+    {
+      name: 'rb',
+      original: "lib/flows/#{answer_name}.rb",
+      v2: "lib/flows/#{answer_name}-v2.rb"
+    },
+    {
+      name: 'yml',
+      original: "lib/flows/locales/en/#{answer_name}.yml",
+      v2: "lib/flows/locales/en/#{answer_name}-v2.yml"
+    },
+    {
+      name: 'test',
+      original: "test/integration/flows/#{snake_name}_test.rb",
+      v2: "test/integration/flows/#{snake_name}_v2_test.rb"
+    },
+    {
+      name: 'calc',
+      original: "lib/smart_answer/calculators/#{snake_name}.rb",
+      v2: "lib/smart_answer/calculators/#{snake_name}_v2.rb"
+    }
+  ]
 end
 
 def createv2(answer_name)
