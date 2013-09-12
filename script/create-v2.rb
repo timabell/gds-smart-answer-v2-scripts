@@ -40,7 +40,7 @@ def setup_filenames(answer_name)
 end
 
 def createv2(answer_name)
-  setup_filenames answer_name
+  files = setup_filenames answer_name
 
   class_name = answer_name.split("-").map(&:capitalize).join
 
