@@ -3,7 +3,7 @@
 # These are used to allow testing and fact checking on preview
 # but will not be served on live (due to the status of draft).
 
-# usage: ruby scripts/create-v2.rb smart-answer-name
+# Usage: create-v2.rb smart-answer-name --diff
 
 def v2file(source, dest, &block)
   content = File.read(source)
