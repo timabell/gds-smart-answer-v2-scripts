@@ -60,10 +60,11 @@ def createv2(answer_name)
 end
 
 def diffv2(answer_name)
-  setup_filenames answer_name
-  diff @rb_file_original, @rb_file_v2
-  diff @yml_file_original, @yml_file_v2
-  diff @test_file_original, @test_file_v2
+  files = setup_filenames answer_name
+
+  files.each do |file|
+    diff file[:original], file[:v2]
+  end
 end
 
 def diff(file1, file2)
