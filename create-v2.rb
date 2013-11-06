@@ -63,7 +63,11 @@ def diffv2(answer_name)
   files = setup_filenames answer_name
 
   files.each do |file|
-    diff file[:original], file[:v2]
+    if File::exists?(file[:v2])
+      diff file[:original], file[:v2]
+    else
+      puts "No v2 found at #{file[:v2]}"
+    end
   end
 end
 
