@@ -3,7 +3,8 @@
 # These are used to allow testing and fact checking on preview
 # but will not be served on live (due to the status of draft).
 
-# Usage: create-v2.rb smart-answer-name --diff
+# Usage:
+#  create-v2.rb smart-answer-name --diff
 
 def v2file(source, dest, &block)
   content = File.read(source)
@@ -14,8 +15,8 @@ def v2file(source, dest, &block)
 end
 
 def setup_filenames(answer_name)
+  snake_name = answer_name.gsub("-", "_")
   [
-    snake_name = answer_name.gsub("-", "_")
     {
       name: 'rb',
       original: "lib/flows/#{answer_name}.rb",
