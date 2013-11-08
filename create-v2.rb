@@ -14,6 +14,7 @@ def v2file(source, dest, &block)
     update = block.call(content)
     file << update
   end
+  puts "Created: #{dest}"
 end
 
 def setup_filenames(answer_name)
@@ -47,17 +48,24 @@ def createv2(answer_name)
 
   class_name = answer_name.split("-").map(&:capitalize).join
 
-  v2file @rb_file_original, @rb_file_v2 do |content|
-    content.gsub(/^status \:published$/, 'status :draft')
-  end
-
-  v2file @yml_file_original, @yml_file_v2 do |content|
-    content.gsub(/#{answer_name}/, "#{answer_name}-v2")
-  end
-
-  v2file @test_file_original, @test_file_v2 do |content|
-    content.gsub(/#{answer_name}/, "#{answer_name}-v2")
-      .gsub(/#{class_name}/, "#{class_name}V2")
+  files.each do |file|
+    if File::exists?(file[:original])
+      v2file file[:original], file[:v2] do |content|
+        case file[:name]
+        when 'rb'
+          content.gsub(/^status \:published$/, 'status :draft')
+        when 'yml'
+          content.gsub(/#{answer_name}/, "#{answer_name}-v2")
+        when 'test'
+          content.gsub(/#{answer_name}/, "#{answer_name}-v2")
+            .gsub(/#{class_name}/, "#{class_name}V2")
+        else
+          throw "Unexpected file[:name] value '#{file[:name]}'"
+        end
+      end
+    else
+      puts "Skipped unused: #{file[:original]}"
+    end
   end
 end
 
