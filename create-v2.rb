@@ -4,7 +4,7 @@
 # but will not be served on live (due to the status of draft).
 
 # Usage:
-#  create-v2.rb smart-answer-name --diff
+#  create-v2.rb smart-answer-name --diff [base-sha1]
 
 def v2file(source, dest, &block)
   content = File.read(source)
@@ -59,20 +59,32 @@ def createv2(answer_name)
   end
 end
 
-def diffv2(answer_name)
+def diffv2(answer_name, base)
   files = setup_filenames answer_name
 
   files.each do |file|
     if File::exists?(file[:v2])
-      diff file[:original], file[:v2]
+      if base
+        base_file="#{file[:original]}.base~"
+        system("git show \"#{base}:#{file[:original]}\" > \"#{base_file}\"")
+      end
+      diff file[:original], file[:v2], base_file
     else
       puts "No v2 found at #{file[:v2]}"
     end
   end
 end
 
-def diff(file1, file2)
-  command = "kdiff3 #{file1} #{file2} &"
+def diff(file1, file2, base)
+  if base
+    command = "kdiff3 #{file1} #{file2} --base #{base} &"
+  else
+    command = "kdiff3 #{file1} #{file2} &"
+  end
+  run command
+end
+
+def run(command)
   p command
   system(command)
 end
@@ -81,7 +93,8 @@ answer_name = ARGV[0]
 raise "answer name missing from arguments" unless answer_name
 
 if ARGV[1] == "--diff"
-  diffv2 answer_name
+  base = ARGV[2]
+  diffv2 answer_name, base
 else
   createv2 answer_name
 end
