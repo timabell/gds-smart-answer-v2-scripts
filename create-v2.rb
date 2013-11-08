@@ -3,7 +3,10 @@
 # These are used to allow testing and fact checking on preview
 # but will not be served on live (due to the status of draft).
 
-# usage: ruby scripts/create-v2.rb smart-answer-name
+# Usage:
+#  create-v2.rb smart-answer-name --diff [base-sha1]
+#  base-sha1 is the revision or branch name of the v1 where no changes to
+#  either have been made (usually just before the v2 was copied out)
 
 def v2file(source, dest, &block)
   content = File.read(source)
@@ -11,48 +14,95 @@ def v2file(source, dest, &block)
     update = block.call(content)
     file << update
   end
+  puts "Created: #{dest}"
 end
 
 def setup_filenames(answer_name)
-  @rb_file_original = "lib/flows/#{answer_name}.rb"
-  @rb_file_v2 = "lib/flows/#{answer_name}-v2.rb"
-
-  @yml_file_original = "lib/flows/locales/en/#{answer_name}.yml"
-  @yml_file_v2 = "lib/flows/locales/en/#{answer_name}-v2.yml"
-
-  test_name = answer_name.gsub("-", "_")
-  @test_file_original = "test/integration/flows/#{test_name}_test.rb"
-  @test_file_v2 = "test/integration/flows/#{test_name}_v2_test.rb"
+  snake_name = answer_name.gsub("-", "_")
+  [
+    {
+      name: 'rb',
+      original: "lib/flows/#{answer_name}.rb",
+      v2: "lib/flows/#{answer_name}-v2.rb"
+    },
+    {
+      name: 'yml',
+      original: "lib/flows/locales/en/#{answer_name}.yml",
+      v2: "lib/flows/locales/en/#{answer_name}-v2.yml"
+    },
+    {
+      name: 'test',
+      original: "test/integration/flows/#{snake_name}_test.rb",
+      v2: "test/integration/flows/#{snake_name}_v2_test.rb"
+    },
+    {
+      name: 'calc',
+      original: "lib/smart_answer/calculators/#{snake_name}.rb",
+      v2: "lib/smart_answer/calculators/#{snake_name}_v2.rb"
+    }
+  ]
 end
 
 def createv2(answer_name)
-  setup_filenames answer_name
+  files = setup_filenames answer_name
 
   class_name = answer_name.split("-").map(&:capitalize).join
 
-  v2file @rb_file_original, @rb_file_v2 do |content|
-    content.gsub(/^status \:published$/, 'status :draft')
+  bail = false
+  files.each do |file|
+    if File::exists?(file[:v2])
+      puts "v2 file already exists #{file[:v2]}"
+      bail = true
+    end
   end
-
-  v2file @yml_file_original, @yml_file_v2 do |content|
-    content.gsub(/#{answer_name}/, "#{answer_name}-v2")
-  end
-
-  v2file @test_file_original, @test_file_v2 do |content|
-    content.gsub(/#{answer_name}/, "#{answer_name}-v2")
-      .gsub(/#{class_name}/, "#{class_name}V2")
+  exit 1 if bail
+  files.each do |file|
+    if File::exists?(file[:original])
+      v2file file[:original], file[:v2] do |content|
+        case file[:name]
+        when 'rb'
+          content.gsub(/^status \:published$/, 'status :draft')
+        when 'yml'
+          content.gsub(/#{answer_name}/, "#{answer_name}-v2")
+        when 'test'
+          content.gsub(/#{answer_name}/, "#{answer_name}-v2")
+            .gsub(/#{class_name}/, "#{class_name}V2")
+        else
+          throw "Unexpected file[:name] value '#{file[:name]}'"
+        end
+      end
+    else
+      puts "Skipped unused: #{file[:original]}"
+    end
   end
 end
 
-def diffv2(answer_name)
-  setup_filenames answer_name
-  diff @rb_file_original, @rb_file_v2
-  diff @yml_file_original, @yml_file_v2
-  diff @test_file_original, @test_file_v2
+def diffv2(answer_name, base)
+  files = setup_filenames answer_name
+
+  files.each do |file|
+    if File::exists?(file[:v2])
+      if base
+        base_file="#{file[:original]}.base~"
+        system("git show \"#{base}:#{file[:original]}\" > \"#{base_file}\"")
+      end
+      diff file[:original], file[:v2], base_file
+    else
+      puts "No v2 found at #{file[:v2]}"
+    end
+  end
 end
 
-def diff(file1, file2)
-  command = "kdiff3 #{file1} #{file2} &"
+def diff(file1, file2, base)
+  if base
+    command = "kdiff3 #{file1} #{file2} --base #{base} &"
+  else
+    command = "kdiff3 #{file1} #{file2} &"
+  end
+  run command
+end
+
+def run(command)
   p command
   system(command)
 end
@@ -61,7 +111,8 @@ answer_name = ARGV[0]
 raise "answer name missing from arguments" unless answer_name
 
 if ARGV[1] == "--diff"
-  diffv2 answer_name
+  base = ARGV[2]
+  diffv2 answer_name, base
 else
   createv2 answer_name
 end
