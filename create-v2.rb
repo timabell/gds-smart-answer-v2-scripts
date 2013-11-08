@@ -48,6 +48,14 @@ def createv2(answer_name)
 
   class_name = answer_name.split("-").map(&:capitalize).join
 
+  bail = false
+  files.each do |file|
+    if File::exists?(file[:v2])
+      puts "v2 file already exists #{file[:v2]}"
+      bail = true
+    end
+  end
+  exit 1 if bail
   files.each do |file|
     if File::exists?(file[:original])
       v2file file[:original], file[:v2] do |content|
