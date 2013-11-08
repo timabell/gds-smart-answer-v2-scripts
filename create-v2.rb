@@ -5,6 +5,8 @@
 
 # Usage:
 #  create-v2.rb smart-answer-name --diff [base-sha1]
+#  base-sha1 is the revision or branch name of the v1 where no changes to
+#  either have been made (usually just before the v2 was copied out)
 
 def v2file(source, dest, &block)
   content = File.read(source)
