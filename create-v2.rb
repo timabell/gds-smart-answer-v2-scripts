@@ -77,27 +77,29 @@ def createv2(answer_name)
   end
 end
 
-def diffv2(answer_name, base)
+def diffv2(answer_name, opts)
   files = setup_filenames answer_name
 
   files.each do |file|
     if File::exists?(file[:v2])
-      if base
+      if opts[:base]
         base_file="#{file[:original]}.base~"
-        system("git show \"#{base}:#{file[:original]}\" > \"#{base_file}\"")
+        system("git show \"#{opts[:base]}:#{file[:original]}\" > \"#{base_file}\"")
       end
-      diff file[:original], file[:v2], base_file
+      diff file[:original], file[:v2], base: base_file, merge: opts[:merge]
     else
       puts "No v2 found at #{file[:v2]}"
     end
   end
 end
 
-def diff(file1, file2, base)
-  if base
-    command = "kdiff3 #{file1} #{file2} --base #{base} &"
+def diff(v1file, v2file, opts)
+  base_opt = "--base #{opts[:base]}" if opts[:base]
+  if opts[:merge]
+    # reverse the diff as the changes are going from v2 into the v1
+    command = "kdiff3 #{v2file} #{v1file} #{base_opt} -o #{v1file} &"
   else
-    command = "kdiff3 #{file1} #{file2} &"
+    command = "kdiff3 #{v1file} #{v2file} #{base_opt} &"
   end
   run command
 end
@@ -112,7 +114,10 @@ raise "answer name missing from arguments" unless answer_name
 
 if ARGV[1] == "--diff"
   base = ARGV[2]
-  diffv2 answer_name, base
+  diffv2 answer_name, base: base
+elsif ARGV[1] == "--merge"
+  base = ARGV[2]
+  diffv2 answer_name, base: base, merge: true
 else
   createv2 answer_name
 end
