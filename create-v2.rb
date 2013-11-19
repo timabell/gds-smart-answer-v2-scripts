@@ -43,6 +43,16 @@ def setup_filenames(answer_name)
   ]
 end
 
+def answer_library
+  {
+    # extra files to diff / duplicate
+    'overseas-passports' => ['lib/smart_answer/calculators/passport_and_embassy_data_query.rb',
+                             'test/unit/calculators/passport_and_embassy_data_query_test.rb',
+                             'lib/data/passport_data.yml']
+    # change data filename to v2 in all v2s
+    # replace calculator class name with v2 in all v2s
+end
+
 def createv2(answer_name)
   files = setup_filenames answer_name
 
